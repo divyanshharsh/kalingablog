@@ -5,7 +5,7 @@ const bcrypt=require('bcrypt')
 const Post=require('../models/Post')
 const Comment=require('../models/Comment')
 const verifyToken = require('../verifyToken')
-
+ 
 
 //UPDATE
 router.put("/:id",verifyToken,async (req,res)=>{

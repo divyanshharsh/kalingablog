@@ -1,112 +1,232 @@
-
-import Navbar from '../components/Navbar'
-import Footer from '../components/Footer'
-import {ImCross} from 'react-icons/im'
-import { useContext, useState } from 'react'
-import { UserContext } from '../context/UserContext'
-import { URL } from '../url'
-import axios from 'axios'
-import { Navigate, useNavigate } from 'react-router-dom'
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
+import { ImCross } from "react-icons/im";
+import { useContext, useState } from "react";
+import { UserContext } from "../context/UserContext";
+import { URL } from "../url";
+import axios from "axios";
+import { Navigate, useNavigate } from "react-router-dom";
+import { storage } from "../components/firebase";
 
 const CreatePost = () => {
-   
-    const [title,setTitle]=useState("")
-    const [desc,setDesc]=useState("")
-    const [file,setFile]=useState(null)
-    const {user}=useContext(UserContext)
-    const [cat,setCat]=useState("")
-    const [cats,setCats]=useState([])
+	const { user } = useContext(UserContext);
+	// const { user, name, phoneNumber, registerNumber, email } = useContext(UserContext);
+	const [title, setTitle] = useState("");
+	const [desc, setDesc] = useState("");
+	const [introductionImage, setIntroductionImage] = useState("");
+	const [blogImages, setBlogImages] = useState([]);
+	const [subBodyImage, setSubBodyImage] = useState("");
+	const [selectedCategory, setSelectedCategory] = useState("");
+	const [introduction, setIntroduction] = useState("");
+	const [body, setBody] = useState("");
+	const [subBody, setSubBody] = useState("");
+	const [conclusion, setConclusion] = useState("");
+	const [faqs, setFaqs] = useState("");
+	const [writerDetails, setWriterDetails] = useState("");
+	const [sources, setSources] = useState("");
 
-    const navigate=useNavigate()
+	const navigate = useNavigate();
 
-    const deleteCategory=(i)=>{
-       let updatedCats=[...cats]
-       updatedCats.splice(i)
-       setCats(updatedCats)
-    }
+	// Uploading image and url generration function into firebase
+	const uploadImage = (img) => {
+		return new Promise((resolve, reject) => {
+			if (img == null) {
+				reject("No image provided");
+				return;
+			}
 
-    const addCategory=()=>{
-        let updatedCats=[...cats]
-        updatedCats.push(cat)
-        setCat("")
-        setCats(updatedCats)
-    }
+			const uploadTask = storage.ref(`images/${img.name}`).put(img);
+			uploadTask.on(
+				"state_changed",
+				(snapshot) => {},
+				(error) => {
+					reject(error.message);
+				},
+				() => {
+					uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+						resolve(downloadURL);
+					});
+				}
+			);
+		});
+	};
 
-    const handleCreate=async (e)=>{
-        e.preventDefault()
-        const post={
-          title,
-          desc,
-          username:user.username,
-          userId:user._id,
-          categories:cats
-        }
+	// Function to handle introduction image change
+	const handleIntroductionImageChange = async (e) => {
+		const file = e.target.files[0];
+		try {
+			const url = await uploadImage(file);
+			setIntroductionImage(url);
+		} catch (error) {
+			console.log("Introduction image upload failed:", error);
+		}
+	};
 
-        if(file){
-          const data=new FormData()
-          const filename=Date.now()+file.name
-          data.append("img",filename)
-          data.append("file",file)
-          post.photo=filename
-          // console.log(data)
-          //img upload
-          try{
-            const imgUpload=await axios.post(URL+"/api/upload",data)
-            // console.log(imgUpload.data)
-          }
-          catch(err){
-            console.log(err)
-          }
-        }
-        //post upload
-        // console.log(post)
-        try{
-          const res=await axios.post(URL+"/api/posts/create",post,{withCredentials:true})
-          navigate("/posts/post/"+res.data._id)
-          // console.log(res.data)
+	// Function to handle blog image change
+	const handleBlogImageChange = async (e) => {
+		const files = e.target.files;
+		const newBlogImages = [];
+		for (let i = 0; i < files.length; i++) {
+			const file = files[i];
+			try {
+				const url = await uploadImage(file);
+				newBlogImages.push(url);
+			} catch (error) {
+				console.log("Blog image upload failed:", error);
+			}
+		}
+		setBlogImages(newBlogImages);
+	};
 
-        }
-        catch(err){
-          console.log(err)
-        }
-    }
+	// Function to handle sub-body image change
+	const handleSubBodyImageChange = async (e) => {
+		const file = e.target.files[0];
+		try {
+			const url = await uploadImage(file);
+			setSubBodyImage(url);
+		} catch (error) {
+			console.log("Sub-body image upload failed:", error);
+		}
+	};
 
+	const handleCreate = async (e) => {
+		e.preventDefault();
 
+		const post = {
+			title,
+			desc,
+			username: user.username,
+			userId: user._id,
+			category: selectedCategory,
+			introduction,
+			body,
+			subBody,
+			conclusion,
+			faqs,
+			writerDetails,
+			sources,
+			introductionImage,
+			blogImages,
+			subBodyImage,
+		};
 
-  return (
-    <div>
-        <Navbar/>
-        <div className='px-6 md:px-[200px] mt-8'>
-        <h1 className='font-bold md:text-2xl text-xl '>Create a post</h1>
-        <form className='w-full flex flex-col space-y-4 md:space-y-8 mt-4'>
-          <input onChange={(e)=>setTitle(e.target.value)} type="text" placeholder='Enter post title' className='px-4 py-2 outline-none'/>
-          <input onChange={(e)=>setFile(e.target.files[0])} type="file"  className='px-4'/>
-          <div className='flex flex-col'>
-            <div className='flex items-center space-x-4 md:space-x-8'>
-                <input value={cat} onChange={(e)=>setCat(e.target.value)} className='px-4 py-2 outline-none' placeholder='Enter post category' type="text"/>
-                <div onClick={addCategory} className='bg-black text-white px-4 py-2 font-semibold cursor-pointer'>Add</div>
-            </div>
+		try {
+			const res = await axios.post(URL + "/api/posts/create", post, {
+				withCredentials: true,
+			});
+			navigate("/posts/post/" + res.data._id);
+		} catch (err) {
+			console.error(err);
+		}
+	};
 
-            {/* categories */}
-            <div className='flex px-4 mt-3'>
-            {cats?.map((c,i)=>(
-                <div key={i} className='flex justify-center items-center space-x-2 mr-4 bg-gray-200 px-2 py-1 rounded-md'>
-                <p>{c}</p>
-                <p onClick={()=>deleteCategory(i)} className='text-white bg-black rounded-full cursor-pointer p-1 text-sm'><ImCross/></p>
-            </div>
-            ))}
-            
-            
-            </div>
-          </div>
-          <textarea onChange={(e)=>setDesc(e.target.value)} rows={15} cols={30} className='px-4 py-2 outline-none' placeholder='Enter post description'/>
-          <button onClick={handleCreate} className='bg-black w-full md:w-[20%] mx-auto text-white font-semibold px-4 py-2 md:text-xl text-lg'>Create</button>
-        </form>
+	const categories = ["Category 1", "Category 2", "Category 3"];
 
-        </div>
-        <Footer/>
-    </div>
-  )
-}
+	return (
+		<div>
+			<Navbar />
+			<div className="px-6 md:px-[200px] mt-8">
+				<h1 className="font-bold md:text-2xl text-xl ">Create a post</h1>
+				<form className="w-full flex flex-col space-y-4 md:space-y-8 mt-4">
+					<select
+						value={selectedCategory}
+						onChange={(e) => setSelectedCategory(e.target.value)}
+						className="px-4 py-2 outline-none"
+					>
+						<option value="">Select a category</option>
+						{categories.map((category, index) => (
+							<option key={index} value={category}>
+								{category}
+							</option>
+						))}
+					</select>
+					<input
+						onChange={(e) => setTitle(e.target.value)}
+						type="text"
+						placeholder="Enter title"
+						className="px-4 py-2 outline-none"
+					/>
+					<input
+						onChange={(e) => setDesc(e.target.value)}
+						type="text"
+						placeholder="Enter description"
+						className="px-4 py-2 outline-none"
+					/>
+					<input type="file" onChange={handleIntroductionImageChange} />
+					{introductionImage && (
+						<img src={introductionImage} alt="Introduction" />
+					)}
+					<textarea
+						onChange={(e) => setIntroduction(e.target.value)}
+						rows={5}
+						cols={30}
+						className="px-4 py-2 outline-none"
+						placeholder="Enter introduction"
+					/>
+					{/* Input field for the blog image */}
+					<input type="file" multiple onChange={handleBlogImageChange} />
+					{blogImages.map((image, index) => (
+						<div key={index}>
+							<img src={image} alt={"Blog Image " + (index + 1)} />
+						</div>
+					))}
 
-export default CreatePost
+					<textarea
+						onChange={(e) => setBody(e.target.value)}
+						rows={15}
+						cols={30}
+						className="px-4 py-2 outline-none"
+						placeholder="Enter body"
+					/>
+					<textarea
+						onChange={(e) => setSubBody(e.target.value)}
+						rows={10}
+						cols={30}
+						className="px-4 py-2 outline-none"
+						placeholder="Enter sub body"
+					/>
+					<input type="file" onChange={handleSubBodyImageChange} />
+					{subBodyImage && <img src={subBodyImage} alt="Sub Body" />}
+
+					<textarea
+						onChange={(e) => setConclusion(e.target.value)}
+						rows={5}
+						cols={30}
+						className="px-4 py-2 outline-none"
+						placeholder="Enter conclusion"
+					/>
+					<textarea
+						onChange={(e) => setFaqs(e.target.value)}
+						rows={5}
+						cols={30}
+						className="px-4 py-2 outline-none"
+						placeholder="Enter FAQs"
+					/>
+					<textarea
+						onChange={(e) => setWriterDetails(e.target.value)}
+						rows={5}
+						cols={30}
+						className="px-4 py-2 outline-none"
+						placeholder="Enter writer details"
+					/>
+					<textarea
+						onChange={(e) => setSources(e.target.value)}
+						rows={5}
+						cols={30}
+						className="px-4 py-2 outline-none"
+						placeholder="Enter sources"
+					/>
+					<button
+						onClick={handleCreate}
+						className="bg-black w-full md:w-[20%] mx-auto text-white font-semibold px-4 py-2 md:text-xl text-lg"
+					>
+						Create
+					</button>
+				</form>
+			</div>
+			<Footer />
+		</div>
+	);
+};
+
+export default CreatePost;
