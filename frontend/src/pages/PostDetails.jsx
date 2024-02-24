@@ -84,107 +84,190 @@ const PostDetails = () => {
 	};
 
 	return (
-		<div>
+		<div className="relative ">
 			<Navbar />
+			<div className="pb-16 "></div>
 			{loader ? (
 				<div className="h-[80vh] flex justify-center items-center w-full">
 					<Loader />
 				</div>
 			) : (
-				<div className="px-8 md:px-[200px] mt-8">
-					<div className="flex justify-between items-center">
-						<h1 className="text-2xl font-bold text-black md:text-3xl">
-							{post.title}
-						</h1>
-						{user?._id === post?.userId && (
-							<div className="flex items-center justify-center space-x-2">
-								<p
-									className="cursor-pointer"
-									onClick={() => navigate("/edit/" + postId)}
-								>
-									<BiEdit />
-								</p>
-								<p className="cursor-pointer" onClick={handleDeletePost}>
-									<MdDelete />
-								</p>
+				<>
+					<div className="h-screen w-screen bg-black fixed z-[-2]"></div>
+					<img
+						src="/BG.jpeg"
+						alt=""
+						className="h-screen w-1/2 objec fixed z-[-1] opacity-80"
+					/>
+					<img
+						src="/BG.jpeg"
+						alt=""
+						className="h-screen w-1/2 fixed z-[-1] right-0 opacity-80"
+					/>
+					<div className=" md:mx-40 px-6 pt-8 bg-white">
+						<div className="flex justify-between items-center">
+							<h1 className="text-2xl font-bold text-black md:text-3xl">
+								{post.title}
+								{post?.category === "Historical" && (
+									<p className="text-yellow-500 text-sm font-semibold ">
+										#HISTORICAL
+									</p>
+								)}
+								{post?.category === "Cultural" && (
+									<p className="text-cyan-600 text-sm font-semibold ">
+										#CULTURAL
+									</p>
+								)}
+								{post?.category === "Multifarious" && (
+									<p className="text-lime-600 text-sm font-semibold ">
+										#MULTIFARIOUS
+									</p>
+								)}
+							</h1>
+							{(user?._id === post?.userId ||
+								user?._id === "65d95b56e49e83adad786352") && (
+								<div className="flex items-center justify-center space-x-2">
+									<p
+										className="cursor-pointer"
+										onClick={() => navigate("/edit/" + postId)}
+									>
+										<BiEdit />
+									</p>
+									<p className="cursor-pointer" onClick={handleDeletePost}>
+										<MdDelete />
+									</p>
+								</div>
+							)}
+						</div>
+						<div className="flex items-center justify-between mt-2 md:mt-4">
+							<p>@{post.username}</p>
+							<div className="flex space-x-2">
+								<p>{new Date(post.updatedAt).toString().slice(0, 15)}</p>
+								<p>{new Date(post.updatedAt).toString().slice(16, 24)}</p>
 							</div>
-						)}
-					</div>
-					<div className="flex items-center justify-between mt-2 md:mt-4">
-						<p>@{post.username}</p>
-						<div className="flex space-x-2">
-							<p>{new Date(post.updatedAt).toString().slice(0, 15)}</p>
-							<p>{new Date(post.updatedAt).toString().slice(16, 24)}</p>
 						</div>
-					</div>
-					{/* Introduction Image */}
-					{post.introductionImage && (
-						<img
-							src={post.introductionImage}
-							className="w-full mx-auto mt-8"
-							alt="Introduction"
-						/>
-					)}
-					<p className="mx-auto mt-8">{post.desc}</p>
-					<div className="flex items-center mt-8 space-x-4 font-semibold">
-						<div className="flex justify-center items-center space-x-2">
-							{post.category}
-						</div>
-					</div>
-					{/* Blog Images */}
-					{post.blogImages &&
-						post.blogImages.map((image, index) => (
+						{/* Introduction Image */}
+						{post.introductionImage ? (
 							<img
-								key={index}
-								src={image}
-								className="w-full mx-auto mt-8"
-								alt={`Blog Image ${index + 1}`}
+								src={post.introductionImage}
+								className="w-full mx-auto mt-8 rounded-sm h-64 object-cover"
+								alt="Introduction"
 							/>
-						))}
-					{/* Sub Body Image */}
-					{post.subBodyImage && (
-						<img
-							src={post.subBodyImage}
-							className="w-full mx-auto mt-8"
-							alt="Introduction"
-						/>
-					)}
-					{/* Body */}
-					<p className="mx-auto mt-8">{post.body}</p>
-					{/* Sub Body */}
-					<p className="mx-auto mt-8">{post.subBody}</p>
-					{/* Conclusion */}
-					<p className="mx-auto mt-8">{post.conclusion}</p>
-					{/* FAQs */}
-					<p className="mx-auto mt-8">{post.faqs}</p>
-					{/* Writer Details */}
-					<p className="mx-auto mt-8">{post.writerDetails}</p>
-					{/* Sources */}
-					<p className="mx-auto mt-8">{post.sources}</p>
-					{/* Comments */}
-					<div className="flex flex-col mt-4">
-						<h3 className="mt-6 mb-4 font-semibold">Comments:</h3>
-						{comments?.map((c) => (
-							<Comment key={c._id} c={c} post={post} />
-						))}
-					</div>
+						) : (
+							<img
+								src="/bg3.png" // Replace with the actual path to your placeholder image
+								className="w-full mx-auto mt-8 rounded-sm h-64 object-cove"
+								alt="Placeholder Image"
+							/>
+						)}
 
-					{/* write a comment */}
-					<div className="w-full flex flex-col mt-4 md:flex-row">
-						<input
-							onChange={(e) => setComment(e.target.value)}
-							type="text"
-							placeholder="Write a comment"
-							className="md:w-[80%] outline-none py-2 px-4 mt-4 md:mt-0"
-						/>
-						<button
-							onClick={postComment}
-							className="bg-black text-sm text-white px-2 py-2 md:w-[20%] mt-4 md:mt-0"
-						>
-							Add Comment
-						</button>
+						{(user?._id === post?.userId ||
+							user?._id === "65d95b56e49e83adad786352") && (
+							<>
+								{/* Introduction */}
+								<fieldset className="mt-8 border-2 border-gray-300 p-15 rounded-lg bg-white">
+									<legend className="font-bold text-gray-700 ml-2">
+										Introduction
+									</legend>
+									<p className="px-4 pb-2">{post.introduction}</p>
+								</fieldset>
+								{/* Description */}
+								<fieldset className="mt-8 border-2 border-gray-300 p-15 rounded-lg bg-white">
+									<legend className="font-bold text-gray-700 ml-2">
+										Description
+									</legend>
+									<p className="px-4 pb-2">{post.desc}</p>
+								</fieldset>
+								{/* Blog Images */}
+								{post.blogImages &&
+									post.blogImages.map((image, index) => (
+										<img
+											key={index}
+											src={image}
+											className="w-full mx-auto mt-8"
+											alt={`Blog Image ${index + 1}`}
+										/>
+									))}
+
+								{/* Body */}
+								<fieldset className="mt-8 border-2 border-gray-300 p-15 rounded-lg bg-white">
+									<legend className="font-bold text-gray-700 ml-2">
+										Blog Body
+									</legend>
+									<p className="px-4 pb-2">{post.body}</p>
+								</fieldset>
+								{/* Sub Body Image */}
+								{post.subBodyImage && (
+									<img
+										src={post.subBodyImage}
+										className="w-full mx-auto mt-8"
+										alt="Introduction"
+									/>
+								)}
+								{/* Sub Body */}
+								<fieldset className="mt-8 border-2 border-gray-300 p-15 rounded-lg bg-white">
+									<legend className="font-bold text-gray-700 ml-2">
+										Sub Body
+									</legend>
+									<p className="px-4 pb-2">{post.subBody}</p>
+								</fieldset>
+								{/* Conclusion */}
+								<fieldset className="mt-8 border-2 border-gray-300 p-15 rounded-lg bg-white">
+									<legend className="font-bold text-gray-700 ml-2">
+										Conclusion
+									</legend>
+									<p className="px-4 pb-2">{post.conclusion}</p>
+								</fieldset>
+								{/* FAQs */}
+								<fieldset className="mt-8 border-2 border-gray-300 p-15 rounded-lg bg-white">
+									<legend className="font-bold text-gray-700 ml-2">FAQs</legend>
+									<p className="px-4 pb-2">{post.faqs}</p>
+								</fieldset>
+								{/* Writer Details */}
+								<fieldset className="mt-8 border-2 border-gray-300 p-15 rounded-lg bg-white">
+									<legend className="font-bold text-gray-700 ml-2">
+										Writer Details
+									</legend>
+									<p className="px-4 pb-2">{post.writerDetails}</p>
+								</fieldset>
+								{/* Sources */}
+								<fieldset className="mt-8 border-2 border-gray-300 p-15 rounded-lg bg-white">
+									<legend className="font-bold text-gray-700 ml-2">
+										Sources
+									</legend>
+									<p className="px-4 pb-2">{post.sources}</p>
+								</fieldset>
+							</>
+						)}
+						{/* Comments */}
+						<fieldset className="mt-8 border-2 border-gray-300 px-2 pb-2 rounded-lg bg-white ">
+							<legend className="font-bold text-gray-700 ml-2">
+								<h3 className="font-semibold">Comments</h3>
+							</legend>
+							{comments?.map((c) => (
+								<Comment key={c._id} c={c} post={post} />
+							))}
+
+							{/* write a comment */}
+							<div className="w-full flex flex-col mt-4 md:flex-row">
+								<input
+									onChange={(e) => setComment(e.target.value)}
+									type="text"
+									placeholder="Write a comment"
+									className="md:w-[80%] outline-none py-2 px-4 mt-4 md:mt-0"
+								/>
+								<button
+									onClick={postComment}
+									className="bg-black text-sm text-white px-2 py-2 md:w-[20%] mt-4 md:mt-0"
+								>
+									Add Comment
+								</button>
+							</div>
+						</fieldset>
+
+						<div className="pb-4"></div>
 					</div>
-				</div>
+				</>
 			)}
 			<Footer />
 		</div>
