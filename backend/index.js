@@ -58,7 +58,7 @@ app.get("/check-db-status", (req, res) => {
 	}
 });
 
-app.listen(process.env.PORT, () => {
+app.listen(() => {
 	connectDB();
-	console.log("app is running on port " + process.env.PORT);
+	console.log("app is running ");
 });
