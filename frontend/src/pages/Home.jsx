@@ -7,6 +7,8 @@ import { useContext, useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import Loader from "../components/Loader";
 import { UserContext } from "../context/UserContext";
+import toast from "react-hot-toast";
+
 
 const Home = () => {
 	const { search } = useLocation();
@@ -29,6 +31,7 @@ const Home = () => {
 			setPosts(res.data);
 			if (res.data.length === 0) {
 				setNoResults(true);
+				toast.error("No posts available");
 			} else {
 				setNoResults(false);
 			}
@@ -36,6 +39,7 @@ const Home = () => {
 		} catch (err) {
 			console.log(err);
 			setLoader(true);
+			toast.error("Error fetching posts");
 		}
 	};
 
@@ -103,7 +107,7 @@ const Home = () => {
 					{/* Time Remaining */}
 					<div className="p-3 rounded-lg bg-white/10 shadow-2xl ring-2 ring-black/5 backdrop-blur-3xl">
 						<p className="text-white text-center font-semibold text-xl pb-2 shadow-2xl">
-							COUNTDOWN
+							Event Countdown
 						</p>
 						<div className="flex gap-2 justify-center items-center  rounded-lg">
 							{/* Days */}

@@ -23,7 +23,7 @@ const Navbar = () => {
 	return (
 		<div className="flex items-center justify-between px-8 py-2 bg-white/70 shadow-lg ring-1 ring-black/5 backdrop-blur-xl fixed top-0 w-full z-20">
 			<div className="">
-				<a href="">
+				<a href="https://www.vitvibrance.com/" target="_blank">
 					<img
 						src="/vibrance.jpg"
 						alt="Vibrance"

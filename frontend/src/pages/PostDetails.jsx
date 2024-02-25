@@ -9,6 +9,7 @@ import { URL, IF } from "../url";
 import { useContext, useEffect, useState } from "react";
 import { UserContext } from "../context/UserContext";
 import Loader from "../components/Loader";
+import toast, { Toaster } from "react-hot-toast";
 
 const PostDetails = () => {
 	const postId = useParams().id;
@@ -24,8 +25,10 @@ const PostDetails = () => {
 			const res = await axios.get(URL + "/api/posts/" + postId);
 			// console.log(res.data)
 			setPost(res.data);
+			// toast.success("Post fetched successfully");
 		} catch (err) {
-			console.log(err);
+			// console.log(err);
+			toast.error("Failed to fetch post");
 		}
 	};
 
@@ -34,10 +37,12 @@ const PostDetails = () => {
 			const res = await axios.delete(URL + "/api/posts/" + postId, {
 				withCredentials: true,
 			});
-			console.log(res.data);
+			// console.log(res.data);
+			toast.success("Post deleted successfully");
 			navigate("/");
 		} catch (err) {
 			console.log(err);
+			toast.error("Failed to delete post");
 		}
 	};
 
@@ -53,7 +58,8 @@ const PostDetails = () => {
 			setLoader(false);
 		} catch (err) {
 			setLoader(true);
-			console.log(err);
+			// console.log(err);
+			toast.error("Failed to fetch comments");
 		}
 	};
 
@@ -179,16 +185,17 @@ const PostDetails = () => {
 									<p className="px-4 pb-2">{post.desc}</p>
 								</fieldset>
 								{/* Blog Images */}
-								{post.blogImages &&
-									post.blogImages.map((image, index) => (
-										<img
-											key={index}
-											src={image}
-											className="w-full mx-auto mt-8"
-											alt={`Blog Image ${index + 1}`}
-										/>
-									))}
-
+								<div className="flex h-56 overflow-hidden">
+									{post.blogImages &&
+										post.blogImages.map((image, index) => (
+											<img
+												key={index}
+												src={image}
+												className=" mt-8 object-cover"
+												alt={`Blog Image ${index + 1}`}
+											/>
+										))}
+								</div>
 								{/* Body */}
 								<fieldset className="mt-8 border-2 border-gray-300 p-15 rounded-lg bg-white">
 									<legend className="font-bold text-gray-700 ml-2">
@@ -200,7 +207,7 @@ const PostDetails = () => {
 								{post.subBodyImage && (
 									<img
 										src={post.subBodyImage}
-										className="w-full mx-auto mt-8"
+										className="w-full mx-auto mt-8 h-64 rounded-sm object-cover"
 										alt="Introduction"
 									/>
 								)}

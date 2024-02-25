@@ -3,6 +3,7 @@ import Footer from "../components/Footer";
 import { useState } from "react";
 import axios from "axios";
 import { URL } from "../url";
+import toast from "react-hot-toast";
 
 const Register = () => {
 	const [username, setUsername] = useState("");
@@ -38,6 +39,7 @@ const Register = () => {
 			setEmail(res.data.email);
 			setPassword(res.data.password);
 			setError(false);
+			toast.success("Account created successfully");
 			navigate("/login");
 		} catch (err) {
 			setError(true);
@@ -62,7 +64,7 @@ const Register = () => {
 					<Link to="/login">Login</Link>
 				</h3>
 			</div>
-			<div className="w-full flex justify-center items-center h-[80vh] ">
+			<div className="w-full flex justify-center items-center  ">
 				<div className="flex flex-col justify-center items-center space-y-4 w-[80%] md:w-[25%]">
 					<h1 className="text-xl font-bold text-left">Create an account</h1>
 					<div className="flex items-center">
@@ -127,6 +129,12 @@ const Register = () => {
 								className="w-full px-4 py-2 border-2 border-black outline-0"
 								type="text"
 								placeholder="Enter team member 2 regno"
+							/>
+							<input
+								onChange={(e) => setPhone(e.target.value)}
+								className="w-full px-4 py-2 border-2 border-black outline-0"
+								type="text"
+								placeholder="Enter your phone"
 							/>
 						</>
 					)}

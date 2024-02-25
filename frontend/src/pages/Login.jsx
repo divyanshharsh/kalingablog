@@ -4,6 +4,7 @@ import { useContext, useState } from "react";
 import axios from "axios";
 import { URL } from "../url";
 import { UserContext } from "../context/UserContext";
+import toast from "react-hot-toast";
 
 const Login = () => {
   const [username, setUsername] = useState("");
@@ -22,6 +23,7 @@ const Login = () => {
       setUser(res.data);
       setError(false);
       navigate("/");
+      toast.success("Welcome back "+res.data.username+" !");
     } catch (err) {
       setError(true);
       console.log(err);

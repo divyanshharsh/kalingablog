@@ -7,6 +7,7 @@ import { URL } from "../url";
 import { useNavigate, useParams } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
 import { storage } from "../components/firebase";
+import toast, { Toaster } from "react-hot-toast";
 
 const EditPost = () => {
 	const postId = useParams().id;
@@ -44,7 +45,8 @@ const EditPost = () => {
 			setWriterDetails(res.data.writerDetails);
 			setSources(res.data.sources);
 		} catch (err) {
-			console.log(err);
+			// console.log(err);
+			toast.error("Error fetching post");
 		}
 	};
 
@@ -66,6 +68,9 @@ const EditPost = () => {
 			.reduce((acc, field) => acc + field.split(/\s+/).length, 0);
 		if (totalWordCount > 3000) {
 			console.log(
+				"Total word count exceeds 3000. Please reduce the word count."
+			);
+			toast.error(
 				"Total word count exceeds 3000. Please reduce the word count."
 			);
 			return;
@@ -94,10 +99,12 @@ const EditPost = () => {
 			const res = await axios.put(URL + "/api/posts/" + postId, post, {
 				withCredentials: true,
 			});
+			toast.success("Post updated successfully");
 			navigate("/posts/post/" + res.data._id);
 			// console.log(res.data)
 		} catch (err) {
 			console.log(err);
+			toast.error("Error updating post");
 		}
 	};
 
@@ -107,26 +114,33 @@ const EditPost = () => {
 
 	// Uploading image and url generration function into firebase
 	const uploadImage = (img) => {
-		return new Promise((resolve, reject) => {
-			if (img == null) {
-				reject("No image provided");
-				return;
-			}
-
-			const uploadTask = storage.ref(`images/${img.name}`).put(img);
-			uploadTask.on(
-				"state_changed",
-				(snapshot) => {},
-				(error) => {
-					reject(error.message);
-				},
-				() => {
-					uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
-						resolve(downloadURL);
-					});
+		return toast.promise(
+			new Promise((resolve, reject) => {
+				if (img == null) {
+					reject("No image provided");
+					return;
 				}
-			);
-		});
+
+				const uploadTask = storage.ref(`images/${img.name}`).put(img);
+				uploadTask.on(
+					"state_changed",
+					(snapshot) => {},
+					(error) => {
+						reject(error.message);
+					},
+					() => {
+						uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+							resolve(downloadURL);
+						});
+					}
+				);
+			}),
+			{
+				loading: "Uploading image...",
+				success: "Image uploaded successfully",
+				error: "Error uploading image",
+			}
+		);
 	};
 
 	// Function to handle introduction image change
@@ -135,8 +149,9 @@ const EditPost = () => {
 		try {
 			const url = await uploadImage(file);
 			setIntroductionImage(url);
+			toast.success("Introduction image uploaded successfully");
 		} catch (error) {
-			console.log("Introduction image upload failed:", error);
+			toast.error("Error uploading introduction image");
 		}
 	};
 
@@ -144,13 +159,20 @@ const EditPost = () => {
 	const handleBlogImageChange = async (e) => {
 		const files = e.target.files;
 		const newBlogImages = [];
+		if (blogImages.length + files.length > 2) {
+			// console.log("Cannot add more than 2 images");
+			toast.error("Cannot add more than 2 images");
+			return;
+		}
 		for (let i = 0; i < files.length; i++) {
 			const file = files[i];
 			try {
 				const url = await uploadImage(file);
 				newBlogImages.push(url);
+				toast.success(`Blog image ${i + 1} uploaded successfully`);
 			} catch (error) {
-				console.log("Blog image upload failed:", error);
+				// console.log("Blog image upload failed:", error);
+				toast.error(`Error uploading blog image ${i + 1}`);
 			}
 		}
 		setBlogImages(newBlogImages);
@@ -161,16 +183,19 @@ const EditPost = () => {
 		const file = e.target.files[0];
 		try {
 			const url = await uploadImage(file);
-			setSubBodyImage(url);
+			setSubBodyImage(url);        
+			toast.success("Sub-body image uploaded successfully");
 		} catch (error) {
-			console.log("Sub-body image upload failed:", error);
+			// console.log("Sub-body image upload failed:", error);
+			toast.error("Error uploading sub-body image");
 		}
 	};
+
 	const handleCategorySelect = (cat) => {
 		setSelectedCategory(cat);
 		console.log(selectedCategory);
 	};
-	const categories = ["Historical", "Cultural", "Multifarious"];
+	// const categories = ["Historical", "Cultural", "Multifarious"];
 
 	return (
 		<div>

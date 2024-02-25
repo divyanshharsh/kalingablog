@@ -42,7 +42,8 @@ const MyBlogs = () => {
 	return (
 		<div>
 			<Navbar />
-			<div className="px-8 md:px-[200px] min-h-[80vh]">
+			<div className="pb-16"></div>
+			<div className="px-8 md:px-40 min-h-[80vh]">
 				{loader ? (
 					<div className="h-[40vh] flex justify-center items-center">
 						<Loader />
@@ -59,6 +60,12 @@ const MyBlogs = () => {
 					<h3 className="text-center font-bold mt-16">No posts available</h3>
 				)}
 			</div>
+			<div className="w-screen h-screen bg-black fixed top-0 left-0 z-[-1] opacity-20"></div>
+			<img
+				src="/bg2.jpeg"
+				alt="background"
+				className="w-screen h-full  fixed top-0 left-0 z-[-2]  opacity-100 "
+			/>
 			<Footer />
 		</div>
 	);

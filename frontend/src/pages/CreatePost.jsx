@@ -1,12 +1,13 @@
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { IoCloseCircleSharp } from "react-icons/io5";
-import { useContext, useState } from "react";
+import { useContext, useState,useEffect } from "react";
 import { UserContext } from "../context/UserContext";
 import { URL } from "../url";
 import axios from "axios";
 import { Navigate, useNavigate, Link } from "react-router-dom";
 import { storage } from "../components/firebase";
+import toast, { Toaster } from "react-hot-toast";
 
 const CreatePost = () => {
 	const { user } = useContext(UserContext);
@@ -23,31 +24,59 @@ const CreatePost = () => {
 	const [faqs, setFaqs] = useState("");
 	const [writerDetails, setWriterDetails] = useState("");
 	const [sources, setSources] = useState("");
-
+	const [hasPosted, setHasPosted] = useState(false);
 	const navigate = useNavigate();
+
+	useEffect(() => {
+		const fetchUserPosts = async () => {
+			try {
+				const res = await axios.get(URL + "/api/posts/user/" + user._id);
+				if (res.data.length > 0) {
+					setHasPosted(true);
+				}
+			} catch (err) {
+				console.log(err);
+			}
+		};
+
+		fetchUserPosts();
+	}, []);
+
+	if (hasPosted) {
+		toast.error("You have already posted a blog");
+		navigate("/myblogs/:id");
+	}
+
 
 	// Uploading image and url generration function into firebase
 	const uploadImage = (img) => {
-		return new Promise((resolve, reject) => {
-			if (img == null) {
-				reject("No image provided");
-				return;
-			}
-
-			const uploadTask = storage.ref(`images/${img.name}`).put(img);
-			uploadTask.on(
-				"state_changed",
-				(snapshot) => {},
-				(error) => {
-					reject(error.message);
-				},
-				() => {
-					uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
-						resolve(downloadURL);
-					});
+		return toast.promise(
+			new Promise((resolve, reject) => {
+				if (img == null) {
+					reject("No image provided");
+					return;
 				}
-			);
-		});
+
+				const uploadTask = storage.ref(`images/${img.name}`).put(img);
+				uploadTask.on(
+					"state_changed",
+					(snapshot) => {},
+					(error) => {
+						reject(error.message);
+					},
+					() => {
+						uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+							resolve(downloadURL);
+						});
+					}
+				);
+			}),
+			{
+				loading: "Uploading image...",
+				success: "Image uploaded successfully",
+				error: "Error uploading image",
+			}
+		);
 	};
 
 	// Function to handle introduction image change
@@ -56,8 +85,9 @@ const CreatePost = () => {
 		try {
 			const url = await uploadImage(file);
 			setIntroductionImage(url);
+			toast.success("Introduction image uploaded successfully");
 		} catch (error) {
-			console.error("Introduction image upload failed:", error);
+			toast.error("Error uploading introduction image");
 		}
 	};
 
@@ -66,7 +96,8 @@ const CreatePost = () => {
 		const files = e.target.files;
 		const newBlogImages = [];
 		if (blogImages.length + files.length > 2) {
-			console.log("Cannot add more than 2 images");
+			// console.log("Cannot add more than 2 images");
+			toast.error("Cannot add more than 2 images");
 			return;
 		}
 		for (let i = 0; i < files.length; i++) {
@@ -74,8 +105,10 @@ const CreatePost = () => {
 			try {
 				const url = await uploadImage(file);
 				newBlogImages.push(url);
+				toast.success(`Blog image ${i + 1} uploaded successfully`);
 			} catch (error) {
-				console.log("Blog image upload failed:", error);
+				// console.log("Blog image upload failed:", error);
+				toast.error(`Error uploading blog image ${i + 1}`);
 			}
 		}
 		setBlogImages(newBlogImages);
@@ -86,9 +119,11 @@ const CreatePost = () => {
 		const file = e.target.files[0];
 		try {
 			const url = await uploadImage(file);
-			setSubBodyImage(url);
+			setSubBodyImage(url);        
+			toast.success("Sub-body image uploaded successfully");
 		} catch (error) {
-			console.log("Sub-body image upload failed:", error);
+			// console.log("Sub-body image upload failed:", error);
+			toast.error("Error uploading sub-body image");
 		}
 	};
 
@@ -109,7 +144,10 @@ const CreatePost = () => {
 			.filter((field) => typeof field === "string")
 			.reduce((acc, field) => acc + field.split(/\s+/).length, 0);
 		if (totalWordCount > 3000) {
-			console.log(
+			// console.log(
+			// 	"Total word count exceeds 3000. Please reduce the word count."
+			// );
+			toast.error(
 				"Total word count exceeds 3000. Please reduce the word count."
 			);
 			return;
@@ -138,8 +176,10 @@ const CreatePost = () => {
 				withCredentials: true,
 			});
 			navigate("/posts/post/" + res.data._id);
+			toast.success("Post created successfully");
 		} catch (err) {
 			console.error(err);
+			toast.error("Error creating post");
 		}
 	};
 
@@ -244,6 +284,7 @@ const CreatePost = () => {
 							</div>
 						</div>
 					</fieldset>
+
 					{/* Title */}
 					<fieldset className="mt-8 border-2 border-gray-300 p-15 rounded-lg bg-white">
 						<legend className="font-bold text-gray-700 ml-2">Title</legend>
@@ -312,7 +353,7 @@ const CreatePost = () => {
 								</label>
 							</div>
 						) : (
-							<img src={introductionImage} alt="Introduction" />
+							<img src={introductionImage} alt="Introduction" className="w-full" />
 						)}
 						<p
 							className="bg-red-500 px-2 py-1 text-white rounded-lg font-medium text-center w-fit mx-auto mt-2 flex items-center gap-2 cursor-pointer
