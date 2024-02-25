@@ -1,115 +1,152 @@
-import { useContext, useEffect, useState } from "react"
-import Footer from "../components/Footer"
-import Navbar from "../components/Navbar"
-import ProfilePosts from "../components/ProfilePosts"
-import axios from "axios"
-import { IF, URL } from "../url"
-import { UserContext } from "../context/UserContext"
-import { useNavigate, useParams } from "react-router-dom"
-
+import { useContext, useEffect, useState } from "react";
+import Footer from "../components/Footer";
+import Navbar from "../components/Navbar";
+import ProfilePosts from "../components/ProfilePosts";
+import axios from "axios";
+import { IF, URL } from "../url";
+import { UserContext } from "../context/UserContext";
+import { useNavigate, useParams } from "react-router-dom";
 
 const Profile = () => {
-  const param=useParams().id
-  const [username,setUsername]=useState("")
-  const [email,setEmail]=useState("")
-  const [password,setPassword]=useState("")
-  const {user,setUser}=useContext(UserContext)
-  const navigate=useNavigate()
-  const [posts,setPosts]=useState([])
-  const [updated,setUpdated]=useState(false)
-  // console.log(user)
+	const param = useParams().id;
+	const { user } = useContext(UserContext);
+	const navigate = useNavigate();
+	const [posts, setPosts] = useState([]);
+	const [username, setUsername] = useState("");
+	const [email, setEmail] = useState("");
+	const [isTeam, setIsTeam] = useState(false);
+	const [name, setName] = useState("");
+	const [name1, setName1] = useState("");
+	const [name2, setName2] = useState("");
+	const [phone, setPhone] = useState("");
+	const [regno, setRegno] = useState("");
+	const [regno1, setRegno1] = useState("");
+	const [regno2, setRegno2] = useState("");
+	const [error, setError] = useState(false);
+	// console.log(user)
 
-const fetchProfile=async ()=>{
-  try{
-     const res=await axios.get(URL+"/api/users/"+user._id)
-     setUsername(res.data.username)
-     setEmail(res.data.email)
-     setPassword(res.data.password)
-  }
-  catch(err){
-     console.log(err)
-  }
-}
+	// const fetchProfile = async () => {
+	// 	try {
+	// 		const res = await axios.get(URL + "/api/users/" + user._id);
+	// 		// setUsername(res.data.username);
+	// 		// setEmail(res.data.email);
+	// 	} catch (err) {
+	// 		console.log(err);
+	// 	}
+	// };
 
-const handleUserUpdate=async ()=>{
-  setUpdated(false)
-  try{
-    const res=await axios.put(URL+"/api/users/"+user._id,{username,email,password},{withCredentials:true})
-    // console.log(res.data)
-    setUpdated(true)
+	const fetchUserPosts = async () => {
+		try {
+			const res = await axios.get(URL + "/api/posts/user/" + user._id);
+			// console.log(res.data)
+			setPosts(res.data);
+		} catch (err) {
+			console.log(err);
+		}
+	};
 
-  }
-  catch(err){
-    console.log(err)
-    setUpdated(false)
-  }
+	const fetchUser = async () => {
+		try {
+			setUsername(user.username);
+			setEmail(user.email);
+			setIsTeam(user.isTeam);
+			setName(user.name);
+			setName1(user.name1);
+			setName2(user.name2);
+			setPhone(user.phone);
+			setRegno(user.regno);
+			setRegno1(user.regno1);
+			setRegno2(user.regno2);
+		} catch (error) {
+			console.log(err);
+		}
+	};
 
-}
+	useEffect(() => {
+		fetchUser();
+	}, [param]);
 
-const handleUserDelete=async()=>{
-  try{
-    const res=await axios.delete(URL+"/api/users/"+user._id,{withCredentials:true})
-    setUser(null)
-    navigate("/")
-    // console.log(res.data)
+	// useEffect(() => {
+	// 	fetchProfile();
+	// }, [param]);
 
-  }
-  catch(err){
-    console.log(err)
-  }
-}
-// console.log(user)
-const fetchUserPosts=async ()=>{
-  try{
-    const res=await axios.get(URL+"/api/posts/user/"+user._id)
-    // console.log(res.data)
-    setPosts(res.data)
+	useEffect(() => {
+		fetchUserPosts();
+	}, [param]);
 
+	return (
+		<div>
+			<Navbar />
+			<div className="pb-16 "></div>
+			<div className="h-screen w-screen bg-black fixed z-[-2]"></div>
+			<img
+				src="/BG.jpeg"
+				alt=""
+				className="h-screen w-1/2 objec fixed z-[-1] opacity-80"
+			/>
+			<img
+				src="/BG.jpeg"
+				alt=""
+				className="h-screen w-1/2 fixed z-[-1] right-0 opacity-80"
+			/>
+			<div className="min-h-[80vh] md:mx-28 px-6 pt-8 flex md:flex-row flex-col-reverse md:items-start items-start bg-white">
+				{/* Left */}
+				<div className="flex flex-col md:w-[70%] w-full mt-8 md:mt-0">
+					<h1 className="text-xl font-bold mb-4">Your posts:</h1>
+					{posts?.map((p) => (
+						<ProfilePosts key={p._id} p={p} />
+					))}
+				</div>
+				{/* Right */}
+				<div className="  flex justify-start md:justify-end items-start w-[30%] md:items-end pb-4">
+					<div className="flex flex-col space-y-2 items-start rounded-lg bg-blue-500/80 shadow-2xl ring-2 ring-blue-600/100 backdrop-blur-3xl py-2 text-white">
+						<div className="mx-auto ">
+							<img
+								src="/userAvatar.jpg"
+								className="rounded-full h-14 w-14 "
+								alt=""
+							/>
+						</div>
+						<p className="text-sm border-t-2 border-b-2 py-2 px-2 w-full">
+							<strong>Username:</strong> <span className="font-medium">@ {username}</span>
+						</p>
+						<p className="text-sm border-b-2 pb-2 px-2 w-full">
+							<strong>Email:</strong> {email}
+						</p>
+						{isTeam ? (
+							<>
+								<p className="text-sm border-b-2 pb-2 px-2 w-full">
+									<strong>Name 1:</strong> {name1}
+								</p>
+								<p className="text-sm border-b-2 pb-2 px-2 w-full">
+									<strong>Name 2:</strong> {name2}
+								</p>
+								<p className="text-sm border-b-2 pb-2 px-2 w-full">
+									<strong>Registration Number 1:</strong> {regno1}
+								</p>
+								<p className="text-sm border-b-2 pb-2 px-2 w-full">
+									<strong>Registration Number 2:</strong> {regno2}
+								</p>
+							</>
+						) : (
+							<>
+								<p className="text-sm border-b-2 pb-2 px-2 w-full">
+									<strong>Name:</strong> {name}
+								</p>
+								<p className="text-sm border-b-2 pb-2 px-2 w-full">
+									<strong>Registration Number:</strong> {regno}
+								</p>
+							</>
+						)}
+						<p className="text-sm pt-2 px-2 w-full">
+							<strong>Phone:</strong> {phone}
+						</p>
+					</div>
+				</div>
+			</div>
+			<Footer />
+		</div>
+	);
+};
 
-  }
-  catch(err){
-    console.log(err)
-  }
-}
-
-useEffect(()=>{
-  fetchProfile()
-
-},[param])
-
-useEffect(()=>{
-  fetchUserPosts()
-
-},[param])
-
-  return (
-    <div>
-      <Navbar/>
-      <div className="min-h-[80vh] px-8 md:px-[200px] mt-8 flex md:flex-row flex-col-reverse md:items-start items-start">
-        <div className="flex flex-col md:w-[70%] w-full mt-8 md:mt-0">
-          <h1 className="text-xl font-bold mb-4">Your posts:</h1>
-          {posts?.map((p)=>(
-            <ProfilePosts key={p._id} p={p}/>
-          ))}
-        </div>
-        <div className="md:sticky md:top-12  flex justify-start md:justify-end items-start md:w-[30%] w-full md:items-end ">
-        <div className=" flex flex-col space-y-4 items-start">
-        <h1 className="text-xl font-bold mb-4">Profile</h1>
-          <input onChange={(e)=>setUsername(e.target.value)} value={username} className="outline-none px-4 py-2 text-gray-500" placeholder="Your username" type="text"/>
-          <input onChange={(e)=>setEmail(e.target.value)} value={email} className="outline-none px-4 py-2 text-gray-500" placeholder="Your email" type="email"/>
-          {/* <input onChange={(e)=>setPassword(e.target.value)} value={password} className="outline-none px-4 py-2 text-gray-500" placeholder="Your password" type="password"/> */}
-          <div className="flex items-center space-x-4 mt-8">
-            <button onClick={handleUserUpdate} className="text-white font-semibold bg-black px-4 py-2 hover:text-black hover:bg-gray-400">Update</button>
-            <button onClick={handleUserDelete} className="text-white font-semibold bg-black px-4 py-2 hover:text-black hover:bg-gray-400">Delete</button>
-          </div>
-          {updated && <h3 className="text-green-500 text-sm text-center mt-4">user updated successfully!</h3>}
-        </div>
-          
-        </div>
-      </div>
-      <Footer/>
-    </div>
-  )
-}
-
-export default Profile
+export default Profile;
