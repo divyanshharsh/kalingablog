@@ -32,6 +32,11 @@ app.use("/api/users", userRoute);
 app.use("/api/posts", postRoute);
 app.use("/api/comments", commentRoute);
 
+// Welcome route in JSON format
+app.get("/", (req, res) => {
+	res.json({ message: "Welcome to the MERN Blogging Website!" });
+  });
+  
 
 app.listen(process.env.PORT, () => {
 	connectDB();
